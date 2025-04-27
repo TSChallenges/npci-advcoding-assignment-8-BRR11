@@ -9,12 +9,20 @@ public class Product {
     @Id
     private Integer id;
 
+    @NotBlank(message = "Product name must not be blank")
     private String name;
 
+    @NotBlank(message = "Category must not be blank")
     private String category;
 
+    @Positive(message = "Price must be positive")
+    @Min(value = 100, message = "Please don't add any product with price lesser than 100")
+    @Max(value = 50000, message = "This platform doesn't allow high priced products. Prices must be <= 50000")
     private Double price;
 
+    @Positive(message = "Stock quantity must be positive")
+    @Min(value = 10, message = "Stock quantity must be at least 10")
+    @Max(value = 500, message = "Stock quantity must not exceed 500")
     private Integer stockQuantity;
 
     public Product() {

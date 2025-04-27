@@ -26,14 +26,24 @@ public class ProductService {
         return productRepository.findAll();
     }
 
+    // 🆕 Updated to support Pagination + Sorting
+    public List<Product> getAllProducts(int page, int pageSize, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, pageSize, sort);
+        Page<Product> productPage = productRepository.findAll(pageable);
+        return productPage.getContent();
+    }
+
     public Product getProduct(Integer id) {
         Optional<Product> productOptional = productRepository.findById(id);
-        return productOptional.get();
+        return productOptional.orElse(null);
     }
 
     public Product updateProduct(Integer id, Product product) {
-        Product p = productRepository.findById(id).get();
-        if (p == null) return null;
+        Optional<Product> optionalProduct = productRepository.findById(id);
+        if (!optionalProduct.isPresent()) return null;
+
+        Product p = optionalProduct.get();
         p.setName(product.getName());
         p.setPrice(product.getPrice());
         p.setCategory(product.getCategory());
@@ -43,22 +53,33 @@ public class ProductService {
     }
 
     public String deleteProduct(Integer id) {
-        Product p = productRepository.findById(id).get();
-        if (p == null) return "Product Not Found";
-        productRepository.delete(p);
+        Optional<Product> optionalProduct = productRepository.findById(id);
+        if (!optionalProduct.isPresent()) {
+            return "Product Not Found";
+        }
+        productRepository.delete(optionalProduct.get());
         return "Product Deleted Successfully";
     }
 
-    // TODO: Method to search products by name
+    // ✅ Method to search products by name
+    public List<Product> searchProductsByName(String name) {
+        return productRepository.findByNameContainingIgnoreCase(name);
+    }
 
+    // ✅ Method to filter products by category
+    public List<Product> filterProductsByCategory(String category) {
+        return productRepository.findByCategoryIgnoreCase(category);
+    }
 
-    // TODO: Method to filter products by category
+    // ✅ Method to filter products by price range
+    public List<Product> filterProductsByPrice(Double minPrice, Double maxPrice) {
+        return productRepository.findByPriceBetween(minPrice, maxPrice);
+    }
 
-
-    // TODO: Method to filter products by price range
-
-
-    // TODO: Method to filter products by stock quantity range
+    // ✅ Method to filter products by stock quantity range
+    public List<Product> filterProductsByStockQuantity(Integer minStock, Integer maxStock) {
+        return productRepository.findByStockQuantityBetween(minStock, maxStock);
+    }
 
 
 }
